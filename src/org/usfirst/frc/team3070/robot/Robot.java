@@ -2,15 +2,15 @@
 package org.usfirst.frc.team3070.robot;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
+import com.ctre.CANTalon;
 
 
 public class Robot extends IterativeRobot {
 
-    static CANTalon leftOne,leftTwo,rightOne,rightTwo;
+    static CANTalon TalLF1,TalLB1,TalRF1,TalRB1;
     static Solenoid shooter;
     static Compressor compressor;
     static Joystick joyLeft, joyRight;
@@ -27,10 +27,10 @@ public class Robot extends IterativeRobot {
     final static double DEADZONE = 0.1;
     final static double DEFAULT_SPEED = 0.25;
     public void robotInit() {
-       leftOne = new CANTalon(LEFT_ONE);
-       leftTwo = new CANTalon(LEFT_TWO);
-       rightOne = new CANTalon(RIGHT_ONE);
-       rightTwo = new CANTalon(RIGHT_TWO);
+       TalLF1 = new CANTalon(LEFT_ONE);
+       TalLB1 = new CANTalon(LEFT_TWO);
+       TalRF1 = new CANTalon(RIGHT_ONE);
+       TalRB1 = new CANTalon(RIGHT_TWO);
        shooter = new Solenoid(SHOOTER_P1,SHOOTER_P2);
        joyLeft = new Joystick(LEFT_JOY);
        joyRight = new Joystick(RIGHT_JOY);
