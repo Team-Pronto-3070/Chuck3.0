@@ -80,14 +80,14 @@ public class Robot extends IterativeRobot {
     
     //Sets left motors to x
     private static void setLeft(double x){
-       leftOne.set(x);
-       leftTwo.set(x);
+       TalLF1.set(x);
+       TalLB1.set(x);
     }
     
     //Sets right motors to x
     private static void setRight(double x){
-       rightOne.set(-x);
-       rightTwo.set(-x);
+       TalRF1.set(-x);
+       TalRB1.set(-x);
     }
     
     //Stops all motors
