@@ -1,109 +1,116 @@
-
 package org.usfirst.frc.team3070.robot;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.Solenoid;
-import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
-import com.ctre.CANTalon;
-
+import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.Solenoid;
 
 public class Robot extends IterativeRobot {
+	TalonSRX tal0, tal1, tal2, tal3;
+	Joystick xbox;
+	Compressor comp;
+	Solenoid sol1, sol2, sol3, sol4, sol5, sol6;
+	public final double DEAD_ZONE = .2;
+	public final double RAMP_IT_UP = .5;
+	public double lturn_coefficient;
+	public double rturn_coefficient;
+	enum driveMode {
+		tank, vidya
+	}
+	driveMode selCM = driveMode.tank;
 
-    static CANTalon TalLF1,TalLB1,TalRF1,TalRB1;
-    static Solenoid shooter;
-    static Compressor compressor;
-    static Joystick joyLeft, joyRight;
-    
-    final static int LEFT_ONE = 0;
-    final static int LEFT_TWO = 3;
-    final static int RIGHT_ONE = 2;
-    final static int RIGHT_TWO = 1;
-    final static int LEFT_JOY = 0;
-    final static int RIGHT_JOY = 1;
-    final static int SHOOTER_P1 = 1;
-    final static int SHOOTER_P2 = 0;
-    
-    final static double DEADZONE = 0.1;
-    final static double DEFAULT_SPEED = 0.25;
-    public void robotInit() {
-       TalLF1 = new CANTalon(LEFT_ONE);
-       TalLB1 = new CANTalon(LEFT_TWO);
-       TalRF1 = new CANTalon(RIGHT_ONE);
-       TalRB1 = new CANTalon(RIGHT_TWO);
-       shooter = new Solenoid(SHOOTER_P1,SHOOTER_P2);
-       joyLeft = new Joystick(LEFT_JOY);
-       joyRight = new Joystick(RIGHT_JOY);
-       compressor = new Compressor();
-       
-       compressor.stop();
-       stopAll();
-       shooter.set(true);
-    }
-    
-    public void autonomousInit() {
+	public void robotInit() {
+		tal0 = new TalonSRX(0); // RIGHT
+		tal1 = new TalonSRX(1); // left
+		tal2 = new TalonSRX(2); // left
+		tal3 = new TalonSRX(3); // right
+		xbox = new Joystick(2);
+		comp = new Compressor();
+		sol1 = new Solenoid(0);
+		sol2 = new Solenoid(1);
+		tal0.set(ControlMode.PercentOutput, 0);
+		tal1.set(ControlMode.PercentOutput, 0);
+		tal2.set(ControlMode.PercentOutput, 0);
+		tal3.set(ControlMode.PercentOutput, 0);
+		tal0.setInverted(true);
+		tal1.setInverted(true);
+		tal2.setInverted(true);
+		tal3.setInverted(true);
+		sol1.set(false);
+		sol2.set(true);
+	}
 
-    }
+	public void teleopPeriodic() {
+		if(xbox.getRawButton(1)) {
+			if(selCM == driveMode.tank) {
+				selCM = driveMode.vidya;
+			} else if(selCM == driveMode.vidya) {
+				selCM = driveMode.tank;
+			}
+		}
+		drive(selCM);
+		if (xbox.getRawButton(2) == true) {
+			sol1.set(true);
+			sol2.set(false);
+		} else {
+			sol1.set(false);
+			sol2.set(true);
+		}
+		if (xbox.getRawButton(1)) {
+			comp.stop();
+		}
+		if (xbox.getRawButton(3)) {
+			comp.start();
+		}
+	}
 
-    public void autonomousPeriodic() {
+	public void testPeriodic() {
 
-    }
+	}
 
-    public void teleopPeriodic() {
-        if(joyRight.getTrigger()){
-           shooter.set(false);
-        } else {
-           shooter.set(true);
-        }
-        
-        //left drive
-        if(Math.abs(joyLeft.getRawAxis(1)) > DEADZONE){
-           setLeft(joyLeft.getRawAxis(1) /2);
-        } else {
-           setLeft(0);
-        }
-        
-        //right drive
-        if(Math.abs(joyRight.getRawAxis(1)) > DEADZONE){
-           setRight(joyRight.getRawAxis(1) /2);
-        } else {
-           setRight(0);
-        }
-        
-        checkCompressor();
-    }
-    
-    public void testPeriodic() {
-       
-       checkCompressor();
-    }
-    
-    //Sets left motors to x
-    private static void setLeft(double x){
-       TalLF1.set(x);
-       TalLB1.set(x);
-    }
-    
-    //Sets right motors to x
-    private static void setRight(double x){
-       TalRF1.set(-x);
-       TalRB1.set(-x);
-    }
-    
-    //Stops all motors
-    private static void stopAll(){
-       setLeft(0);
-       setRight(0);
-    }
+	public void drive(driveMode dm) {
+		if (dm == driveMode.tank) {
+			if (Math.abs(xbox.getRawAxis(1)) > DEAD_ZONE) {
+				tal1.set(ControlMode.PercentOutput, xbox.getRawAxis(1) / 2);
+				tal2.set(ControlMode.PercentOutput, xbox.getRawAxis(1) / 2);
+			} else {
+				tal1.set(ControlMode.PercentOutput, 0);
+				tal2.set(ControlMode.PercentOutput, 0);
+			}
+			if (Math.abs(xbox.getRawAxis(5)) > DEAD_ZONE) {
+				tal0.set(ControlMode.PercentOutput, -xbox.getRawAxis(5) / 2);
+				tal3.set(ControlMode.PercentOutput, -xbox.getRawAxis(5) / 2);
+			} else {
+				tal0.set(ControlMode.PercentOutput, 0);
+				tal3.set(ControlMode.PercentOutput, 0);
+			}
+		} else if (dm == driveMode.vidya) {
+			if (!(Math.abs(xbox.getRawAxis(3)) > DEAD_ZONE && Math.abs(xbox.getRawAxis(4)) > DEAD_ZONE)) {
+				getTurnCos();
+				if (Math.abs(xbox.getRawAxis(3)) > DEAD_ZONE) {
+					tal0.set(ControlMode.PercentOutput, (-xbox.getRawAxis(3) / 2) + rturn_coefficient);
+					tal1.set(ControlMode.PercentOutput, (xbox.getRawAxis(3) / 2) + lturn_coefficient);
+					tal2.set(ControlMode.PercentOutput, (xbox.getRawAxis(3) / 2) + lturn_coefficient);
+					tal3.set(ControlMode.PercentOutput, (-xbox.getRawAxis(3) / 2) + rturn_coefficient);
+				} else if (Math.abs(xbox.getRawAxis(4)) > DEAD_ZONE) {
+					tal0.set(ControlMode.PercentOutput, (xbox.getRawAxis(4) / 2) + rturn_coefficient);
+					tal1.set(ControlMode.PercentOutput, (-xbox.getRawAxis(4) / 2) + lturn_coefficient);
+					tal2.set(ControlMode.PercentOutput, (-xbox.getRawAxis(4) / 2) + lturn_coefficient);
+					tal3.set(ControlMode.PercentOutput, (xbox.getRawAxis(4) / 2) + rturn_coefficient);
+				}
+			}
+		}
+	}
 
-    //Compressor set to keystrokes on leftJoy
-    //Button 6 is start, button 7 is stop
-    private static void checkCompressor(){
-       if(joyLeft.getRawButton(6)){
-          compressor.start();
-       }
-       if(joyLeft.getRawButton(7)){
-          compressor.stop();
-       }
-    }
+	public void getTurnCos() {
+		if (Math.abs(xbox.getRawAxis(1)) > DEAD_ZONE) {
+			if (xbox.getRawAxis(1) > 0) {
+				lturn_coefficient = xbox.getRawAxis(1);
+			} else if (xbox.getRawAxis(1) > 0) {
+				rturn_coefficient = xbox.getRawAxis(1);
+			}
+		}
+	}
 }
